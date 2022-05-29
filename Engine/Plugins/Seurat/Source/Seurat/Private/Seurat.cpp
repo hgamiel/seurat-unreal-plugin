@@ -17,6 +17,8 @@
 #include "SeuratConfigWindow.h"
 #include "SceneCaptureSeuratDetail.h"
 #include "JsonManifest.h"
+#include "Serialization/JsonSerializer.h"
+#include "Serialization/JsonWriter.h"
 
 #include "Framework/SlateDelegates.h"
 #include "Engine/TextureRenderTarget2D.h"
@@ -32,9 +34,12 @@
 #include "Editor/EditorPerformanceSettings.h"
 #include "LevelEditor.h"
 #include "Kismet/GameplayStatics.h"
+#include "ImageWriteTask.h"
+#include "HighResScreenshot.h"
+#include "ImageWriteQueue.h"
 #endif // WITH_EDITOR
 
-static const FString kSeuratOutputDir = FPaths::ConvertRelativePathToFull(FPaths::GameIntermediateDir() / "SeuratCapture");
+static const FString kSeuratOutputDir = FPaths::ConvertRelativePathToFull(FPaths::ProjectIntermediateDir() / "SeuratCapture");
 static const int32 kTimerExpirationsPerCapture = 4;
 
 #define LOCTEXT_NAMESPACE "FSeuratModule"
@@ -174,7 +179,7 @@ void FSeuratModule::AddToolbarExtension(FToolBarBuilder& Builder)
 {
 }
 
-void FSeuratModule::Tick(ELevelTick TickType, float DeltaSeconds)
+void FSeuratModule::Tick(UWorld* World, ELevelTick TickType, float DeltaTime)
 {
 	if (CurrentSample < 0)
 	{
@@ -486,6 +491,7 @@ TSharedPtr<FJsonObject> FSeuratModule::Capture(FRotator Orientation, FVector Pos
 
 void FSeuratModule::WriteImage(UTextureRenderTarget2D* InRenderTarget, FString Filename, bool bClearAlpha)
 {
+#if WITH_EDITOR
 	FTextureRenderTargetResource* RTResource = InRenderTarget->GameThread_GetRenderTargetResource();
 
 	// We're reading back depth in centimeters from alpha, and linear lighting.
@@ -503,8 +509,38 @@ void FSeuratModule::WriteImage(UTextureRenderTarget2D* InRenderTarget, FString F
 
 	FString ResultPath;
 	FHighResScreenshotConfig& HighResScreenshotConfig = GetHighResScreenshotConfig();
-	HighResScreenshotConfig.bCaptureHDR = true;
-	HighResScreenshotConfig.SaveImage(Filename, OutBMP, DestSize);
+
+	// Save the contents of the array to a bitmap file.
+	HighResScreenshotConfig.SetHDRCapture(true);
+	//HighResScreenshotConfig.SaveImage(Filename, OutBMP, DestSize);
+
+	// New Code by vMattC
+
+	if (!ensure(HighResScreenshotConfig.ImageWriteQueue))
+	{
+		return;
+	}
+
+	// Create ImageTask
+	TUniquePtr<FImageWriteTask> ImageTask = MakeUnique<FImageWriteTask>();
+
+	// Pass bitmap to pixeldata
+	ImageTask->PixelData = MakeUnique<TImagePixelData<FLinearColor>>(DestSize, (TArray<FLinearColor, FDefaultAllocator64>) MoveTemp(OutBMP));
+
+	// Populate Task with config data
+	HighResScreenshotConfig.PopulateImageTaskParams(*ImageTask);
+	ImageTask->Filename = Filename;
+
+	// Specify HDR as output format
+	ImageTask->Format = EImageFormat::EXR;
+
+	// Save the bitmap to disc
+	TFuture<bool> CompletionFuture = HighResScreenshotConfig.ImageWriteQueue->Enqueue(MoveTemp(ImageTask));
+	if (CompletionFuture.IsValid())
+	{
+		CompletionFuture.Wait();
+	}
+#endif
 }
 
 bool FSeuratModule::SaveStringTextToFile(FString SaveDirectory, FString FileName, FString SaveText, bool AllowOverWriting)

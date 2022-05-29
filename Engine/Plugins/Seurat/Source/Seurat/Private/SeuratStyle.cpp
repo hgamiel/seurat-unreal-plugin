@@ -14,9 +14,9 @@
 */
 
 #include "SeuratStyle.h"
-#include "SlateGameResources.h"
+#include "Slate/SlateGameResources.h"
 #include "Styling/SlateStyleRegistry.h"
-#include "IPluginManager.h"
+#include "Interfaces/IPluginManager.h"
 
 TSharedPtr< FSlateStyleSet > FSeuratStyle::StyleInstance = NULL;
 

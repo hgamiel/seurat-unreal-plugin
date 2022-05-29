@@ -16,7 +16,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Commands/Commands.h"
+#include "Framework/Commands/Commands.h"
 #include "SeuratStyle.h"
 
 class FSeuratCommands : public TCommands<FSeuratCommands>

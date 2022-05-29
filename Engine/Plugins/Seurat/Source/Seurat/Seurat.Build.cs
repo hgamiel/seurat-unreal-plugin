@@ -57,6 +57,7 @@ public class Seurat : ModuleRules
 				"SlateCore",
 				"Json",
 				"PropertyEditor",
+				"ImageWriteQueue"
 				// ... add private dependencies that you statically link with here ...
 			}
 			);
