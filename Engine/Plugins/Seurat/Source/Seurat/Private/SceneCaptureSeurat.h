@@ -42,7 +42,7 @@ enum class ECaptureResolution : uint8
 	K1536 = 13,
 };
 
-UCLASS(hidecategories = (Collision, Material, Attachment, Actor), MinimalAPI)
+UCLASS(BlueprintType, hidecategories = (Collision, Material, Attachment, Actor), MinimalAPI)
 class ASceneCaptureSeurat : public ASceneCapture2D
 {
 	GENERATED_UCLASS_BODY()
@@ -55,4 +55,8 @@ class ASceneCaptureSeurat : public ASceneCapture2D
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SeuratSettings, meta = (DisplayName = "Resolution"))
 	ECaptureResolution Resolution;
+
+	/** This can be called on the basis of a Seurat scene capture component that you don't already have selected in the scene. */
+	UFUNCTION(BlueprintCallable, Category = "Seurat Utility")
+	void BeginManualCapture();
 };

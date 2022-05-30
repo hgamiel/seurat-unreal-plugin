@@ -264,12 +264,15 @@ void FSeuratModule::BeginCapture(ASceneCaptureSeurat* InCaptureCamera)
 	}
 
 	// Save initial camera state.
-	InitialPosition = ColorCameraActor->GetActorLocation();
-	InitialRotation = ColorCameraActor->GetActorRotation();
+	// Note that Google's original code for this got the actor rotation & location instead of the capture component's location & rotation.
+	// We've updated it to the component's location and rotation so that if blueprints manage where the scene components go,
+	// it will respect that for the actual capture.
+	InitialPosition = ColorCameraActor->GetCaptureComponent2D()->GetComponentLocation();
+	InitialRotation = ColorCameraActor->GetCaptureComponent2D()->GetComponentRotation();
 
 	// Calculate this matrix before changing capture camera postion.
 	WorldFromReferenceCameraMatrixSeurat = SeuratMatrixFromUnrealMatrix(
-		ColorCameraActor->GetTransform().ToMatrixNoScale());
+		ColorCameraActor->GetCaptureComponent2D()->GetComponentTransform().ToMatrixNoScale());
 
 	ColorCamera = ColorCameraActor->GetCaptureComponent2D();
 	ColorCamera->TextureTarget = NewObject<UTextureRenderTarget2D>();
@@ -293,11 +296,11 @@ void FSeuratModule::BeginCapture(ASceneCaptureSeurat* InCaptureCamera)
 		HeadboxPosition.Z *= HeadboxSize.Z;
 		HeadboxPosition -= HeadboxSize * 0.5f;
 		// Headbox samples are in camera space; transform to world space.
-		HeadboxPosition = ColorCameraActor->GetTransform().TransformPosition(HeadboxPosition);
+		HeadboxPosition = ColorCameraActor->GetCaptureComponent2D()->GetComponentTransform().TransformPosition(HeadboxPosition);
 		Samples.Add(HeadboxPosition);
 	}
 
-	FVector CameraLocation = ColorCameraActor->GetActorLocation();
+	FVector CameraLocation = ColorCameraActor->GetCaptureComponent2D()->GetComponentLocation();
 
 	// Sort samples by distance from center of the headbox.
 	Samples.Sort([&CameraLocation](const FVector& V1, const FVector& V2) {
@@ -326,8 +329,8 @@ void FSeuratModule::EndCapture()
 	CurrentSample = -1;
 
 	// Restore camera state.
-	ColorCameraActor->SetActorLocation(InitialPosition);
-	ColorCameraActor->SetActorRotation(InitialRotation);
+	ColorCameraActor->GetCaptureComponent2D()->SetWorldLocation(InitialPosition);
+	ColorCameraActor->GetCaptureComponent2D()->SetWorldRotation(InitialRotation);
 
 	RestoreTimeFlow(ColorCameraActor.Get());
 
@@ -422,8 +425,8 @@ void FSeuratModule::CaptureSeurat()
 TSharedPtr<FJsonObject> FSeuratModule::Capture(FRotator Orientation, FVector Position)
 {
 	// Setup the camera.
-	ColorCameraActor->SetActorLocation(Position);
-	ColorCameraActor->SetActorRotation(Orientation);
+	ColorCameraActor->GetCaptureComponent2D()->SetWorldLocation(Position);
+	ColorCameraActor->GetCaptureComponent2D()->SetWorldRotation(Orientation);
 
 	// Note that if bCaptureEveryFrame is true and the game is not paused by any means,
 	// then this function call is redundant. However this is intentional since there are
@@ -452,7 +455,7 @@ TSharedPtr<FJsonObject> FSeuratModule::Capture(FRotator Orientation, FVector Pos
 	// This camera matrix stores this sample location's transformation, as opposed
 	// to the reference camera transform stored in
 	// WorldFromReferenceCameraMatrixSeurat.
-	FMatrix WorldFromEyeSampleCameraUnreal = ColorCameraActor->GetTransform().ToMatrixNoScale();
+	FMatrix WorldFromEyeSampleCameraUnreal = ColorCameraActor->GetCaptureComponent2D()->GetComponentTransform().ToMatrixNoScale();
 
 	const FMatrix WorldFromEyeSeurat = SeuratMatrixFromUnrealMatrix(
 		WorldFromEyeSampleCameraUnreal);

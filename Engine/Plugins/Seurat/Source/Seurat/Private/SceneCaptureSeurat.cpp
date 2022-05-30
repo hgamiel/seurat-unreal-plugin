@@ -29,3 +29,12 @@ ASceneCaptureSeurat::ASceneCaptureSeurat(const FObjectInitializer& ObjectInitial
 	GetCaptureComponent2D()->bCaptureOnMovement = false;
 	PrimaryActorTick.bCanEverTick = true;
 }
+
+void ASceneCaptureSeurat::BeginManualCapture()
+{
+	FSeuratModule* SeuratModule = FModuleManager::GetModulePtr<FSeuratModule>("Seurat");
+	if (SeuratModule != nullptr)
+	{
+		SeuratModule->BeginCapture(this);
+	}
+}
