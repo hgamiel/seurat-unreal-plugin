@@ -513,11 +513,12 @@ void FSeuratModule::WriteImage(UTextureRenderTarget2D* InRenderTarget, FString F
 	FString ResultPath;
 	FHighResScreenshotConfig& HighResScreenshotConfig = GetHighResScreenshotConfig();
 
+	// In order to make this plugin run in 4.27.2, we've grabbed the following 
+	// updates recommended from https://forums.unrealengine.com/t/recommended-way-to-replace-the-fhighresolutionscreenshotconfig-saveimage-in-4-21/120551
+	// and put the code below.
+
 	// Save the contents of the array to a bitmap file.
 	HighResScreenshotConfig.SetHDRCapture(true);
-	//HighResScreenshotConfig.SaveImage(Filename, OutBMP, DestSize);
-
-	// New Code by vMattC
 
 	if (!ensure(HighResScreenshotConfig.ImageWriteQueue))
 	{
