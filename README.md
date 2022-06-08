@@ -1,3 +1,12 @@
+# Hannah's Seurat modifications!
+
+This plugin has been updated to work against Unreal Engine 4.27.2. The [original Seurat UE4 plugin repository](https://github.com/googlevr/seurat-unreal-plugin) has been abandoned by Google and will not compile against 4.27.2 right off the bat, so this fork solves that problem and adds a couple more nifty features/changes:
+* Ability to run this plugin in 4.27.2, which is the latest public release version of Unreal Engine 4.
+* Allows for calling Capture from within a blueprint instead of having to click "Capture" on the actor instance of a Seurat capture actor.
+* Ensures that the capture is taken from the scene capture component location, not the actor location of the Seurat actor. This ensures the capture respects where the capture component is if it is offset from the main actor.
+
+If you run into issues building the Seurat pipeline (NOT this plugin, but the actual thing you need to make use of what this plugin does) from source, you can use [@ddiakopolis](https://github.com/ddiakopoulos)' [compiled binaries for Seurat](https://github.com/ddiakopoulos/seurat/releases). I ran into issues compiling from source myself, and these binaries worked perfectly. The Seurat pipeline is required for you to actually generate the mesh you can import back into Unreal, after all of the captures are taken from within Unreal. Instructions/command line params/more information on how to use the pipeline are here on the [Seurat GitHub page](https://github.com/googlevr/seurat).
+
 # Importing Seurat Meshes Into Unreal
 
 Seurat is a scene simplification technology designed to process very complex 3D scenes into a representation that renders efficiently on mobile 6DoF VR systems.
