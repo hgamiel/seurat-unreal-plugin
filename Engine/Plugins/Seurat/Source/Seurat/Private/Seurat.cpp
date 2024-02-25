@@ -276,14 +276,14 @@ void FSeuratModule::BeginCapture(ASceneCaptureSeurat* InCaptureCamera)
 
 	ColorCamera = ColorCameraActor->GetCaptureComponent2D();
 	ColorCamera->TextureTarget = NewObject<UTextureRenderTarget2D>();
-	int32 InResolution = static_cast<int32>(ColorCameraActor->Resolution);
-	int32 Resolution = InResolution == 13 ? 1536 : FGenericPlatformMath::Pow(2, InResolution);
+	float InResolution = static_cast<float>(ColorCameraActor->Resolution);
+	int32 Resolution = InResolution == 13 ? 1536 : static_cast<int32>(FGenericPlatformMath::Pow(2.f, InResolution));
 	ColorCamera->CaptureSource = ESceneCaptureSource::SCS_SceneColorSceneDepth;
 	ColorCamera->TextureTarget->InitCustomFormat(Resolution, Resolution, PF_FloatRGBA, true);
 
 	Samples.Empty();
 	FVector HeadboxSize = ColorCameraActor->HeadboxSize;
-	int32 SamplesPerFace = FGenericPlatformMath::Pow(2, static_cast<int32>(ColorCameraActor->SamplesPerFace));
+	int32 SamplesPerFace = static_cast<int32>(FGenericPlatformMath::Pow(2.f, static_cast<float>(ColorCameraActor->SamplesPerFace)));
 	// Use Hammersly sampling for reproduciblity.
 	for (int32 SampleIndex = 0; SampleIndex < SamplesPerFace; ++SampleIndex)
 	{
@@ -436,8 +436,8 @@ TSharedPtr<FJsonObject> FSeuratModule::Capture(FRotator Orientation, FVector Pos
 	// enqueue this CaptureScene() command.
 	ColorCamera->CaptureScene();
 
-	int32 InResolution = static_cast<int32>(ColorCameraActor->Resolution);
-	int32 Resolution = InResolution == 13 ? 1536 : FGenericPlatformMath::Pow(2, InResolution);
+	float InResolution = static_cast<float>(ColorCameraActor->Resolution);
+	int32 Resolution = InResolution == 13 ? 1536 : static_cast<int32>(FGenericPlatformMath::Pow(2.f, InResolution));
 
 	// Note, this matrix won't necessarily match Unreal's projection matrix. It
 	// doesn't matter in this case, because the Unreal plug captures eye space Z,
@@ -513,7 +513,7 @@ void FSeuratModule::WriteImage(UTextureRenderTarget2D* InRenderTarget, FString F
 	FString ResultPath;
 	FHighResScreenshotConfig& HighResScreenshotConfig = GetHighResScreenshotConfig();
 
-	// In order to make this plugin run in 4.27.2, we've grabbed the following 
+	// In order to make this plugin run in 4.27.2, we've grabbed the following
 	// updates recommended from https://forums.unrealengine.com/t/recommended-way-to-replace-the-fhighresolutionscreenshotconfig-saveimage-in-4-21/120551
 	// and put the code below.
 

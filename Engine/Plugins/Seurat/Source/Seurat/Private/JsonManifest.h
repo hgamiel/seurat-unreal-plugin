@@ -106,4 +106,3 @@ public:
 		return Ret;
 	}
 };
-
