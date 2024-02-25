@@ -3,6 +3,7 @@
 This plugin has been updated to work against Unreal Engine 4.27.2 AND 5.3.2. See Tags for specific releases that target each version of the engine.
 The [original Seurat UE4 plugin repository](https://github.com/googlevr/seurat-unreal-plugin) has been abandoned by Google and will not compile against 4.27.2 right off the bat, so this fork solves that problem and adds a couple more nifty features/changes:
 * Ability to run this plugin in 4.27.2, which is the latest public release version of Unreal Engine 4.
+* Ability to run this plugin in 5.3.2, which is the latest public release version of Unreal Engine 5.
 * Allows for calling Capture from within a blueprint instead of having to click "Capture" on the actor instance of a Seurat capture actor.
 * Ensures that the capture is taken from the scene capture component location, not the actor location of the Seurat actor. This ensures the capture respects where the capture component is if it is offset from the main actor.
 
